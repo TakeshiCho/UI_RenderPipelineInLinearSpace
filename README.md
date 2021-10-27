@@ -14,3 +14,10 @@ that keep the sRGB workflow for the UI designers in Unity.
 このプロジェクトは Unity URP に基づいて作った UI レンダーパイプラインとシェーダーフレームワークです、
 Unity リニア の色空間にある UI 画像の透明さをなおす為に作れたものです。
 ならば、UI デザイナーはいつもように sRGB の業務フローをすることができます。
+
+# Versions and Schecdule
+The frist version will be finishied on 11/07/2021.
+
+第一个版本将于2021年11月7日完成。
+
+一つ目のバージョンは 2021年11月7日に完成つもりです。
