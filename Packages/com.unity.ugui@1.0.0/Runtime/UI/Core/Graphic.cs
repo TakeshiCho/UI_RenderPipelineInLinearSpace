@@ -90,8 +90,11 @@ namespace UnityEngine.UI
         {
             get
             {
+                Shader uiShader = Shader.Find("UI/URP_Linear_Space_Default");
+                Material uiMaterial = new Material(uiShader);
                 if (s_DefaultUI == null)
-                    s_DefaultUI = Canvas.GetDefaultCanvasMaterial();
+                    //s_DefaultUI = Canvas.GetDefaultCanvasMaterial();
+                    s_DefaultUI = uiMaterial;
                 return s_DefaultUI;
             }
         }
