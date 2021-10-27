@@ -3,4 +3,9 @@
 /Logs/
 /obj/
 /Temp/
-/ProjectVersion.txt/
+/UserSettings/
+*.csproj
+*.sln
+*.suo
+*.tmp
+*.user
