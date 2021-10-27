@@ -49,7 +49,7 @@ Shader "UI/URP_Linear_Space_Default"
         Pass
         {
             Name "URP_UI_Default"
-        HLSLPROGRAM
+            HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment pixel
             #pragma target 2.0
@@ -65,7 +65,7 @@ Shader "UI/URP_Linear_Space_Default"
                 float4 vertex   : POSITION;
                 float4 color    : COLOR;
                 float2 texcoord : TEXCOORD0;
-                UNITY_VERTEX_INPUT_INSTANCE_ID
+                UNITY_VERTEX_INPUT_INSTANCE_ID               
             };
 
             struct v2f
@@ -111,32 +111,9 @@ Shader "UI/URP_Linear_Space_Default"
                 OUT.color = v.color * _Color;
                 return OUT;
             }
-
-            float4 pixel(v2f IN) : SV_Target
-            {
-                //Round up the alpha color coming from the interpolator (to 1.0/256.0 steps)
-                //The incoming alpha could have numerical instability, which makes it very sensible to
-                //HDR color transparency blend, when it blends with the world's texture.
-                const half alphaPrecision = half(0xff);
-                const half invAlphaPrecision = half(1.0/alphaPrecision);
-                IN.color.a = round(IN.color.a * alphaPrecision)*invAlphaPrecision;
-
-                half4 color = IN.color * (SAMPLE_TEXTURE2D(_MainTex,sampler_MainTex,IN.texcoord) + _TextureSampleAdd);
-
-                #ifdef UNITY_UI_CLIP_RECT
-                half2 m = saturate((_ClipRect.zw - _ClipRect.xy - abs(IN.mask.xy)) * IN.mask.zw);
-                color.a *= m.x * m.y;
-                #endif
-
-                #ifdef UNITY_UI_ALPHACLIP
-                clip (color.a - 0.001);
-                #endif
-
-                color.rgb *= color.a;
-
-                return color;
-            }
-        ENDHLSL
+            #include "UI_Pixel.hlsl"
+            
+            ENDHLSL
         }
     }
 }
