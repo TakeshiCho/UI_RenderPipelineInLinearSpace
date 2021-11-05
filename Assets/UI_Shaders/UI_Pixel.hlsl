@@ -30,7 +30,6 @@ float4 pixel(v2f IN) : SV_Target
     clip (color.a - 0.001);
     #endif
 
-    color.rgb = LinearToSRGB(color.rgb);
     color.rgb *= color.a;
 
     return color;

@@ -16,7 +16,6 @@ Shader "Hidden/Universal Render Pipeline/Blit"
             #pragma vertex FullscreenVert
             #pragma fragment Fragment
             #pragma multi_compile_fragment _ _LINEAR_TO_SRGB_CONVERSION
-            #pragma multi_compile_fragment _ _SRGB_TO_LINEAR_CONVERSION
             #pragma multi_compile _ _USE_DRAW_PROCEDURAL
 
             #include "Packages/com.unity.render-pipelines.universal/Shaders/Utils/Fullscreen.hlsl"
@@ -34,11 +33,6 @@ Shader "Hidden/Universal Render Pipeline/Blit"
              #ifdef _LINEAR_TO_SRGB_CONVERSION
                 col = LinearToSRGB(col);
              #endif
-
-             #ifdef _SRGB_TO_LINEAR_CONVERSION
-                col = SRGBToLinear(col);
-             #endif
-
 
                 return col;
             }
