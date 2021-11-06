@@ -1,6 +1,9 @@
 ﻿#ifndef UI_PIXEL_INCLUDE
 #define UI_PIXEL_INCLUDE
 
+
+// This is a overridable method for calculate UI image color
+// if you want make some effects for UI image, please override this method.
 #ifndef INITIALIZE_UI_IMAGE
 #define INITIALIZE_UI_IMAGE InitializeUIImage
 void InitializeUIImage(v2f IN,inout float4 color)
@@ -30,7 +33,10 @@ float4 pixel(v2f IN) : SV_Target
     clip (color.a - 0.001);
     #endif
 
+    // Guaranteeing that your UI texture is selected "sRGB (Color Texture)" in "(Texture 2D) Import Setting".
     color.rgb = LinearToSRGB(color.rgb);
+
+    // Guaranteeing that your UI shader is in mode of "One OneMinusSrcAlpha".
     color.rgb *= color.a;
 
     return color;

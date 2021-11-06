@@ -214,7 +214,15 @@ namespace UnityEngine.Rendering.Universal.Internal
                 var cmd = CommandBufferPool.Get();
                 using (new ProfilingScope(cmd, m_ProfilingRenderFinalPostProcessing))
                 {
+                    // Add By:      Takehsi;
+                    // Purpose:     Final Process of Fix UI alpha gamma in case of FXAA ON.
+                    cmd.EnableShaderKeyword(ShaderKeywordStrings.SRGBToLinearConversion);
+                    // End Add
+                    
                     RenderFinalPass(cmd, ref renderingData);
+                    
+                    // Add By: Takehsi; End the Final Process.
+                    cmd.DisableShaderKeyword(ShaderKeywordStrings.SRGBToLinearConversion);
                 }
 
                 context.ExecuteCommandBuffer(cmd);
@@ -232,11 +240,13 @@ namespace UnityEngine.Rendering.Universal.Internal
                 var cmd = CommandBufferPool.Get();
                 using (new ProfilingScope(cmd, m_ProfilingRenderPostProcessing))
                 {
-                    cmd.EnableShaderKeyword(ShaderKeywordStrings.LinearToSRGBConversion); // Add By: Takehsi; Purpose: First Process of Fix UI alpha gamma.
+                    // Add By: Takehsi; Purpose: First Process of Fix UI alpha gamma.
+                    cmd.EnableShaderKeyword(ShaderKeywordStrings.LinearToSRGBConversion);
                     
                     Render(cmd, ref renderingData);
                     
-                    cmd.DisableShaderKeyword(ShaderKeywordStrings.LinearToSRGBConversion); // Add By: Takehsi
+                    // Add By: Takehsi; End the First Process.
+                    cmd.DisableShaderKeyword(ShaderKeywordStrings.LinearToSRGBConversion);
                 }
 
                 context.ExecuteCommandBuffer(cmd);
