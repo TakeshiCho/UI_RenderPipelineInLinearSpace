@@ -21,4 +21,4 @@ Unity：2020.3.21
 
 当前版本在 camera 使用 Post-Processing 时，Game 视图内可以对 UI 透明度进行矫正.
 
-开发计划：1）修复 scene 视图 UI 颜色错误; 2）增加对非 post-Processing 环境下的校色支持。
+当前更新：1）修复了 scene 视图 UI 颜色错误;  2）增加了对非 post-Processing 环境下的校色支持。
