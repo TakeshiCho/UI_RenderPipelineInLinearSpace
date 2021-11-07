@@ -56,6 +56,15 @@ namespace UnityEngine.Rendering.Universal
         PostProcessPass m_FinalPostProcessPass;
         FinalBlitPass m_FinalBlitPass;
         CapturePass m_CapturePass;
+        
+        // Add by: Takeshi
+        FixingGammaPass m_FirstProcessWhenNoPost;
+        #if UNITY_EDITOR
+        FixingGammaPass m_FirstProcessInSceneView;
+        FixingGammaPass m_FinalProcessInSceneView;
+        #endif
+        // End Add
+        
 #if ENABLE_VR && ENABLE_XR_MODULE
         XROcclusionMeshPass m_XROcclusionMeshPass;
         CopyDepthPass m_XRCopyDepthPass;
@@ -181,9 +190,17 @@ namespace UnityEngine.Rendering.Universal
             m_FinalPostProcessPass = new PostProcessPass(RenderPassEvent.AfterRendering + 1, data.postProcessData, m_BlitMaterial);
             m_CapturePass = new CapturePass(RenderPassEvent.AfterRendering);
             m_FinalBlitPass = new FinalBlitPass(RenderPassEvent.AfterRendering + 1, m_BlitMaterial);
+            
+            // Add by: Takehsi
+            m_FirstProcessWhenNoPost = new FixingGammaPass(RenderPassEvent.AfterRenderingPostProcessing+1,m_BlitMaterial, "First Process of Fixing Gamma ( when Post Processing off )", ShaderKeywordStrings.LinearToSRGBConversion);
 
 #if UNITY_EDITOR
             m_SceneViewDepthCopyPass = new SceneViewDepthCopyPass(RenderPassEvent.AfterRendering + 9, m_CopyDepthMaterial);
+            
+            // Add By: Takeshi
+            m_FirstProcessInSceneView = new FixingGammaPass(RenderPassEvent.AfterRenderingSkybox ,m_BlitMaterial, "First Process", ShaderKeywordStrings.LinearToSRGBConversion,"_FirstFixGammaProcessInSceneView");
+            m_FinalProcessInSceneView = new FixingGammaPass(RenderPassEvent.BeforeRenderingPostProcessing ,m_BlitMaterial, "Final Process", ShaderKeywordStrings.SRGBToLinearConversion,"_FinalFixGammaProcessInSceneView");
+            // End Add
 #endif
 
             // RenderTexture format depends on camera and pipeline (HDR, non HDR, etc)
@@ -485,8 +502,33 @@ namespace UnityEngine.Rendering.Universal
             // However when there are render passes executing after post we avoid resolving to screen so rendering continues (before sRGBConvertion etc)
             bool resolvePostProcessingToCameraTarget = !hasCaptureActions && !hasPassesAfterPostProcessing && !applyFinalPostProcessing;
 
+            // Add By:  Takeshi
+            // Purpose: First Process of Fix UI alpha gamma in case of Post-Processing Off.
+            if (!anyPostProcessing && !isSceneViewCamera && camera.CompareTag("MainCamera"))
+            {
+                m_FirstProcessWhenNoPost.Setup(m_ActiveCameraColorAttachment);
+                EnqueuePass(m_FirstProcessWhenNoPost);
+            }
+            // End Add
+            
+            // Add by:  Takeshi
+            // Purpose: Fix Scene View UI opacity
+            if (isSceneViewCamera)
+            {
+                m_FirstProcessInSceneView.Setup(m_ActiveCameraColorAttachment);
+                EnqueuePass(m_FirstProcessInSceneView);
+            
+                if (anyPostProcessing)
+                {
+                    m_FinalProcessInSceneView.Setup(m_ActiveCameraColorAttachment);
+                    EnqueuePass(m_FinalProcessInSceneView);
+                }
+            }
+            // End Add
+
             if (lastCameraInTheStack)
             {
+                
                 // Post-processing will resolve to final target. No need for final blit pass.
                 if (applyPostProcessing)
                 {
