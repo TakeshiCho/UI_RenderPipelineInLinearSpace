@@ -16,8 +16,9 @@ Unity リニア の色空間にある UI 画像の透明さをなおす為に作
 ならば、UI デザイナーはいつもように sRGB の業務フローをすることができます。
 
 # Versions and Schecdule
-The frist version will be finishied on 11/07/2021.
 
-第一个版本将于2021年11月7日完成。
+Unity：2020.3.21
 
-一つ目のバージョンは 2021年11月7日に完成つもりです。
+当前版本在 camera 使用 Post-Processing 时，Game 试图内可以对 UI 透明度进行矫正.
+
+开发计划：1）修复 scene 试图 UI 颜色错误; 2）增加对非 post-Processing 环境下的校色支持。
