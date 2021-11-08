@@ -513,6 +513,7 @@ namespace UnityEngine.Rendering.Universal
             
             // Add by:  Takeshi
             // Purpose: Fix Scene View UI opacity
+            #if UNITY_EDITOR
             if (isSceneViewCamera)
             {
                 m_FirstProcessInSceneView.Setup(m_ActiveCameraColorAttachment);
@@ -524,6 +525,7 @@ namespace UnityEngine.Rendering.Universal
                     EnqueuePass(m_FinalProcessInSceneView);
                 }
             }
+            #endif
             // End Add
 
             if (lastCameraInTheStack)
