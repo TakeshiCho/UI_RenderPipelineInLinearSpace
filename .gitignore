@@ -9,4 +9,5 @@
 *.suo
 *.tmp
 *.user
+*.log
 /Packages/com.unity.render-pipelines.universal@10.6.0/Documentation~/
