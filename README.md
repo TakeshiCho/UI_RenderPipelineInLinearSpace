@@ -28,6 +28,7 @@ Unity リニア の色空間にある UI 画像の透明さをなおす為に作
 ![Opacity_Comparison](./Readme/Opacity_Comparison.png)
 
 ### Update:
+* 修复了 Reflection Probe 烘焙错误;
 * 修复了 scene 视图 UI 颜色错误;
 * 增加了对非 post-Processing 环境下的校色支持。
 
