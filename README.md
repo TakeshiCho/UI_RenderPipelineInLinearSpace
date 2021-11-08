@@ -17,11 +17,19 @@ Unity リニア の色空間にある UI 画像の透明さをなおす為に作
 
 # Versions and Schecdule
 
-Unity：2020.3.21
+###Unity:
+* Unity: 2020.3.21 f1c1  
+* Unity UI: com.unity.render-pipelines.universal@10.6.0  
+* Universal RP: com.unity.ugui@1.0.0  
 
-当前版本在 camera 使用 Post-Processing 时，Game 视图内可以对 UI 透明度进行矫正.
+###Feature:
+* 针对 Game 视图，对 UI 透明度进行矫正，使其和 Ps 里的不透明度保持一致。
 
-当前更新：1）修复了 scene 视图 UI 颜色错误;  2）增加了对非 post-Processing 环境下的校色支持。
+![Opacity_Comparison](./Readme/Opacity_Comparison.png)
+
+###Update:
+* 修复了 scene 视图 UI 颜色错误;
+* 增加了对非 post-Processing 环境下的校色支持。
 
 # Pipeline Flowchart
-![UI_RenderPipeline](./UI_RenderPipeline.png)
+![UI_RenderPipeline](./Readme/UI_RenderPipeline.png)
