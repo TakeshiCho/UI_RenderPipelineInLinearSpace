@@ -2,6 +2,9 @@
  * Date:    11/06/2021
  * purpose: A common Pass for convert color gamme to Fix UI opacity
  */
+
+using UnityEngine.Experimental.Rendering;
+
 namespace UnityEngine.Rendering.Universal.Internal
 {
     /// <summary>
@@ -59,15 +62,21 @@ namespace UnityEngine.Rendering.Universal.Internal
                     // Create a new RT.
                     RenderTextureDescriptor desc = renderingData.cameraData.cameraTargetDescriptor;
                     desc.depthBufferBits = 0;
+                    
+                    desc.graphicsFormat = GraphicsFormat.R8G8B8A8_UNorm;
                     cmd.GetTemporaryRT(m_TempBlit.id, desc);
                     
                     // Conversion Gamma
-                    cmd.EnableShaderKeyword(m_ShaderKeyword);
                     cmd.Blit(m_Source.Identifier(),m_TempBlit.Identifier(),m_BlitMaterial);
-                    cmd.DisableShaderKeyword(m_ShaderKeyword);
-                
+                    
                     // Return to main RT
-                    cmd.Blit(m_TempBlit.Identifier(),m_Source.Identifier());
+                    cmd.ReleaseTemporaryRT(m_Source.id);
+                    //desc.sRGB = false;
+                    cmd.GetTemporaryRT(m_Source.id, desc);
+                    cmd.SetGlobalTexture(ShaderPropertyId.sourceTex,m_TempBlit.Identifier());
+                    cmd.EnableShaderKeyword(m_ShaderKeyword);
+                    cmd.Blit(m_TempBlit.Identifier(),m_Source.Identifier(),m_BlitMaterial);
+                    cmd.DisableShaderKeyword(m_ShaderKeyword);
                     
                 // }
                 // else
