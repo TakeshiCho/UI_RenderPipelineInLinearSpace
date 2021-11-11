@@ -30,10 +30,11 @@ Unity リニア の色空間にある UI 画像の透明さをなおす為に作
 ### Update:
 * 修复了 Reflection Probe 烘焙错误;
 * 修复了 scene 视图 UI 颜色错误;
-* 增加了对非 post-Processing 环境下的校色支持。
+* 增加了对非 post-Processing 环境下的校色支持;
+* 改善了 校色后的 3D 渲染色阶失真。
+
 ### Plan:
 * 修复 scene 视图 Reflection Probe 显示不正确;
-* 改善 Post-Processing 轻微色阶失真。
 
 # Pipeline Flowchart
 ![UI_RenderPipeline](./Readme/UI_RenderPipeline.png)
