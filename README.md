@@ -23,18 +23,26 @@ Unity リニア の色空間にある UI 画像の透明さをなおす為に作
 * Universal RP: com.unity.ugui@1.0.0  
 
 ### Feature:
-* 针对 Game 视图，对 UI 透明度进行矫正，使其和 Ps 里的不透明度保持一致。
+* In our Render Pipeline,the UI images have the same opacity with images which are in the PhotoShop.
 
 ![Opacity_Comparison](./Readme/Opacity_Comparison.png)
 
 ### Update:
-* 修复了 Reflection Probe 烘焙错误;
-* 修复了 scene 视图 UI 颜色错误;
-* 增加了对非 post-Processing 环境下的校色支持;
-* 改善了 校色后的 3D 渲染色阶失真。
+* 11 / 05 / 2021:  
+Supported correct UI alpha gamma in case of the Post-Processing;  
+Fixed the wrong effects of baked Reflection Probe;  
+Fixed the Gamma in Scene view;  
+  
+  
+* 11 / 06 / 2021:   
+  supported correct UI alpha gamma in case of FXAA;  
+ 
+  
+* 11 / 12 / 2021:  
+  Fixed the Color Depth resolution of 3D render.
 
 ### Plan:
-* 修复 scene 视图 Reflection Probe 显示不正确;
+* To fix the wrong effects of Reflection Probe in scene view.
 
 # Pipeline Flowchart
 ![UI_RenderPipeline](./Readme/UI_RenderPipeline.png)
