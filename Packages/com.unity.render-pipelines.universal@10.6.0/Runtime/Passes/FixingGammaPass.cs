@@ -57,41 +57,28 @@ namespace UnityEngine.Rendering.Universal.Internal
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
                 cmd.SetGlobalTexture(ShaderPropertyId.sourceTex, m_Source.Identifier());
-                // if (cameraData.isSceneViewCamera)
-                // {
-                    // Create a new RT.
-                    RenderTextureDescriptor desc = renderingData.cameraData.cameraTargetDescriptor;
-                    desc.depthBufferBits = 0;
-                    
+
+                // Create a new RT.
+                RenderTextureDescriptor desc = renderingData.cameraData.cameraTargetDescriptor;
+                desc.depthBufferBits = 0;
+                
+                cmd.GetTemporaryRT(m_TempBlit.id, desc);
+                
+                cmd.Blit(m_Source.Identifier(),m_TempBlit.Identifier(),m_BlitMaterial);
+                
+                // Recreate Main Buffer
+                cmd.ReleaseTemporaryRT(m_Source.id);
+                #if UNITY_EDITOR
+                if (!cameraData.isSceneViewCamera)
+                #endif
                     desc.graphicsFormat = GraphicsFormat.R8G8B8A8_UNorm;
-                    cmd.GetTemporaryRT(m_TempBlit.id, desc);
-                    
-                    // Conversion Gamma
-                    cmd.Blit(m_Source.Identifier(),m_TempBlit.Identifier(),m_BlitMaterial);
-                    
-                    // Return to main RT
-                    cmd.ReleaseTemporaryRT(m_Source.id);
-                    //desc.sRGB = false;
-                    cmd.GetTemporaryRT(m_Source.id, desc);
-                    cmd.SetGlobalTexture(ShaderPropertyId.sourceTex,m_TempBlit.Identifier());
-                    cmd.EnableShaderKeyword(m_ShaderKeyword);
-                    cmd.Blit(m_TempBlit.Identifier(),m_Source.Identifier(),m_BlitMaterial);
-                    cmd.DisableShaderKeyword(m_ShaderKeyword);
-                    
-                // }
-                // else
-                // {
-                //     RenderTargetIdentifier cameraTarget = new RenderTargetIdentifier(m_TempBlit.id);
-                //     CoreUtils.SetRenderTarget(
-                //         cmd,
-                //         cameraTarget);
-                //     
-                //     cmd.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.identity);
-                //     cmd.SetViewport(cameraData.pixelRect);
-                //     cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_BlitMaterial);
-                //     cmd.SetViewProjectionMatrices(camera.worldToCameraMatrix, camera.projectionMatrix);
-                //     
-                // }
+                cmd.GetTemporaryRT(m_Source.id, desc);
+                cmd.SetGlobalTexture(ShaderPropertyId.sourceTex,m_TempBlit.Identifier());
+                
+                // Conversion Gamma,and return to main Buffer
+                cmd.EnableShaderKeyword(m_ShaderKeyword);
+                cmd.Blit(m_TempBlit.Identifier(),m_Source.Identifier(),m_BlitMaterial);
+                cmd.DisableShaderKeyword(m_ShaderKeyword);
             }
 
             context.ExecuteCommandBuffer(cmd);

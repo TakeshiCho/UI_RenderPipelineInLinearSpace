@@ -131,7 +131,7 @@ namespace UnityEngine.Rendering.Universal.Internal
         public void Setup(in RenderTextureDescriptor baseDescriptor, in RenderTargetHandle source, in RenderTargetHandle destination, in RenderTargetHandle depth, in RenderTargetHandle internalLut, bool hasFinalPass, bool enableSRGBConversion)
         {
             m_Descriptor = baseDescriptor;
-            m_Descriptor.graphicsFormat = GraphicsFormat.R8G8B8A8_UNorm; //Add by:Takeshi
+            //m_Descriptor.graphicsFormat = GraphicsFormat.R8G8B8A8_UNorm; //Add by:Takeshi
             m_Descriptor.useMipMap = false;
             m_Descriptor.autoGenerateMips = false;
             m_Source = source;
@@ -502,6 +502,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                     {
                         // Add by:Takeshi
                         cmd.ReleaseTemporaryRT(m_Source.id);
+                        m_Descriptor.graphicsFormat = GraphicsFormat.R8G8B8A8_UNorm;
                         cmd.GetTemporaryRT(m_Source.id,m_Descriptor);
                         // End Add
                         
