@@ -37,7 +37,7 @@ Unity リニア の色空間にある UI 画像の透明さをなおす為に作
 * 修复 scene 视图 Reflection Probe 显示不正确;
 
 # Pipeline Flowchart
-![UI_RenderPipelineFlowChart](./Readme/UI_RenderPipelineFlowChart.png)![UI_RenderPipeline](./Readme/UI_RenderPipeline.png)
+![UI_RenderPipeline](./Readme/UI_RenderPipeline.png)
 
 ## Why using *RGBA32 UNorm* for the UI Buffer
 When the final 3D render image is blit into the UI buffer, and transform to the Gamma Space, 
