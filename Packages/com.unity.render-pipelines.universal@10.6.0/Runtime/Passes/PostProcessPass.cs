@@ -241,12 +241,12 @@ namespace UnityEngine.Rendering.Universal.Internal
                 var cmd = CommandBufferPool.Get();
                 using (new ProfilingScope(cmd, m_ProfilingRenderPostProcessing))
                 {
-                    // Add By: Takehsi; Purpose: First Process of Fix UI alpha gamma.
+                    // Add By: Takeshi; Purpose: First Process of Fix UI alpha gamma.
                     cmd.EnableShaderKeyword(ShaderKeywordStrings.LinearToSRGBConversion);
                     
                     Render(cmd, ref renderingData);
                     
-                    // Add By: Takehsi; End the First Process.
+                    // Add By: Takeshi; End the First Process.
                     cmd.DisableShaderKeyword(ShaderKeywordStrings.LinearToSRGBConversion);
                 }
 
