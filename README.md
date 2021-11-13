@@ -29,13 +29,13 @@ Unity リニア の色空間にある UI 画像の透明さをなおす為に作
 
 ### Update:
 * 11 / 05 / 2021:  
-Supported correct UI alpha gamma in case of the Post-Processing;  
-Fixed the wrong effects of baked Reflection Probe;  
-Fixed the Gamma in Scene view;  
+  Supported correct UI alpha gamma in case of Post-Processing;  
+  Fixed the wrong effects of baked Reflection Probe;  
+  Fixed the Gamma in Scene view;  
   
   
 * 11 / 06 / 2021:   
-  supported correct UI alpha gamma in case of FXAA;  
+  Supported correct UI alpha gamma in case of FXAA;  
  
   
 * 11 / 12 / 2021:  
