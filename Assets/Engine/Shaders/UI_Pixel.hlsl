@@ -12,6 +12,8 @@ void InitializeUIImage(v2f IN,inout float4 color)
 }
 #endif
 
+half _IsInUICamera;
+
 float4 pixel(v2f IN) : SV_Target
 {
     //Round up the alpha color coming from the interpolator (to 1.0/256.0 steps)
@@ -34,7 +36,7 @@ float4 pixel(v2f IN) : SV_Target
     #endif
 
     // Guaranteeing that your UI texture is selected "sRGB (Color Texture)" in "(Texture 2D) Import Setting".
-    color.rgb = LinearToSRGB(color.rgb);
+    color.rgb = lerp(color.rgb,LinearToSRGB(color.rgb),_IsInUICamera);
 
     // Guaranteeing that your UI shader is in mode of "One OneMinusSrcAlpha".
     color.rgb *= color.a;

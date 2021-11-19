@@ -215,14 +215,14 @@ namespace UnityEngine.Rendering.Universal.Internal
                 var cmd = CommandBufferPool.Get();
                 using (new ProfilingScope(cmd, m_ProfilingRenderFinalPostProcessing))
                 {
-                    // Add By:      Takehsi;
+                    // Add By:      Takeshi;
                     // Purpose:     Final Process of Fix UI alpha gamma in case of FXAA ON.
                     cmd.EnableShaderKeyword(ShaderKeywordStrings.SRGBToLinearConversion);
                     // End Add
                     
                     RenderFinalPass(cmd, ref renderingData);
                     
-                    // Add By: Takehsi; End the Final Process.
+                    // Add By: Takeshi; End the Final Process.
                     cmd.DisableShaderKeyword(ShaderKeywordStrings.SRGBToLinearConversion);
                 }
 

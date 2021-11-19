@@ -18,6 +18,7 @@ namespace UnityEngine.Rendering.Universal.Internal
         string m_ProfilerTag;
         ProfilingSampler m_ProfilingSampler;
         bool m_IsOpaque;
+        LayerMask m_LayerMask;
 
         static readonly int s_DrawObjectPassDataPropID = Shader.PropertyToID("_DrawObjectPassData");
 
@@ -40,6 +41,8 @@ namespace UnityEngine.Rendering.Universal.Internal
                 m_RenderStateBlock.mask = RenderStateMask.Stencil;
                 m_RenderStateBlock.stencilState = stencilState;
             }
+
+            m_LayerMask = layerMask;
         }
 
         public DrawObjectsPass(string profilerTag, bool opaque, RenderPassEvent evt, RenderQueueRange renderQueueRange, LayerMask layerMask, StencilState stencilState, int stencilReference)
@@ -62,6 +65,15 @@ namespace UnityEngine.Rendering.Universal.Internal
             CommandBuffer cmd = CommandBufferPool.Get();
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
+                Camera camera = renderingData.cameraData.camera;
+                if (camera.CompareTag("UICamera"))
+                    cmd.SetGlobalFloat(ShaderPropertyId.isInUICamera,1);
+#if UNITY_EDITOR
+                else if(m_FilteringSettings.layerMask == LayerMask.GetMask("UI") && renderingData.cameraData.isSceneViewCamera)
+                    cmd.SetGlobalFloat(ShaderPropertyId.isInUICamera,1);
+#endif
+                else cmd.SetGlobalFloat(ShaderPropertyId.isInUICamera,0);
+                
                 // Global render pass data containing various settings.
                 // x,y,z are currently unused
                 // w is used for knowing whether the object is opaque(1) or alpha blended(0)
@@ -81,7 +93,6 @@ namespace UnityEngine.Rendering.Universal.Internal
                 context.ExecuteCommandBuffer(cmd);
                 cmd.Clear();
 
-                Camera camera = renderingData.cameraData.camera;
                 var sortFlags = (m_IsOpaque) ? renderingData.cameraData.defaultOpaqueSortFlags : SortingCriteria.CommonTransparent;
                 var drawSettings = CreateDrawingSettings(m_ShaderTagIdList, ref renderingData, sortFlags);
                 var filterSettings = m_FilteringSettings;

@@ -58,11 +58,12 @@ namespace UnityEngine.Rendering.Universal
         CapturePass m_CapturePass;
         
         // Add by: Takeshi
+        DrawObjectsPass m_UguiPass;
         FixingGammaPass m_FirstProcessWhenNoPost;
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         FixingGammaPass m_FirstProcessInSceneView;
         FixingGammaPass m_FinalProcessInSceneView;
-        #endif
+#endif
         // End Add
         
 #if ENABLE_VR && ENABLE_XR_MODULE
@@ -183,7 +184,8 @@ namespace UnityEngine.Rendering.Universal
 #endif
             {
                 m_TransparentSettingsPass = new TransparentSettingsPass(RenderPassEvent.BeforeRenderingTransparents, data.shadowTransparentReceive);
-                m_RenderTransparentForwardPass = new DrawObjectsPass(URPProfileId.DrawTransparentObjects, false, RenderPassEvent.BeforeRenderingTransparents, RenderQueueRange.transparent, data.transparentLayerMask, m_DefaultStencilState, stencilData.stencilReference);
+                m_RenderTransparentForwardPass = new DrawObjectsPass(URPProfileId.DrawTransparentObjects, false, RenderPassEvent.BeforeRenderingTransparents, RenderQueueRange.transparent, data.transparentLayerMask, m_DefaultStencilState, 
+                stencilData.stencilReference);
             }
             m_OnRenderObjectCallbackPass = new InvokeOnRenderObjectCallbackPass(RenderPassEvent.BeforeRenderingPostProcessing);
             m_PostProcessPass = new PostProcessPass(RenderPassEvent.BeforeRenderingPostProcessing, data.postProcessData, m_BlitMaterial);
@@ -191,14 +193,17 @@ namespace UnityEngine.Rendering.Universal
             m_CapturePass = new CapturePass(RenderPassEvent.AfterRendering);
             m_FinalBlitPass = new FinalBlitPass(RenderPassEvent.AfterRendering + 1, m_BlitMaterial);
             
-            // Add by: Takehsi
+            // Add by: Takeshi
+            m_UguiPass = new DrawObjectsPass("UGUI", false, RenderPassEvent.BeforeRenderingTransparents +1,
+                RenderQueueRange.transparent, LayerMask.GetMask("UI"), m_DefaultStencilState,
+                stencilData.stencilReference);
             m_FirstProcessWhenNoPost = new FixingGammaPass(RenderPassEvent.AfterRenderingPostProcessing+1,m_BlitMaterial, "First Process of Fixing Gamma ( when Post Processing off )", ShaderKeywordStrings.LinearToSRGBConversion);
 
 #if UNITY_EDITOR
             m_SceneViewDepthCopyPass = new SceneViewDepthCopyPass(RenderPassEvent.AfterRendering + 9, m_CopyDepthMaterial);
             
             // Add By: Takeshi
-            m_FirstProcessInSceneView = new FixingGammaPass(RenderPassEvent.AfterRenderingSkybox ,m_BlitMaterial, "First Process", ShaderKeywordStrings.LinearToSRGBConversion,"_FirstFixGammaProcessInSceneView");
+            m_FirstProcessInSceneView = new FixingGammaPass(RenderPassEvent.BeforeRenderingTransparents, m_BlitMaterial, "First Process", ShaderKeywordStrings.LinearToSRGBConversion,"_FirstFixGammaProcessInSceneView");
             m_FinalProcessInSceneView = new FixingGammaPass(RenderPassEvent.BeforeRenderingPostProcessing ,m_BlitMaterial, "Final Process", ShaderKeywordStrings.SRGBToLinearConversion,"_FinalFixGammaProcessInSceneView");
             // End Add
 #endif
@@ -282,6 +287,7 @@ namespace UnityEngine.Rendering.Universal
                     return;
 #endif
                 EnqueuePass(m_RenderTransparentForwardPass);
+                EnqueuePass(m_UguiPass); // Add By: Takeshi
                 return;
             }
 
@@ -490,6 +496,7 @@ namespace UnityEngine.Rendering.Universal
                 }
 
                 EnqueuePass(m_RenderTransparentForwardPass);
+                EnqueuePass(m_UguiPass); // Add By: Takeshi
             }
             EnqueuePass(m_OnRenderObjectCallbackPass);
 
@@ -514,7 +521,7 @@ namespace UnityEngine.Rendering.Universal
             // Add by:  Takeshi
             // Purpose: Fix Scene View UI opacity
             #if UNITY_EDITOR
-            if (isSceneViewCamera)
+            if (cameraData.isSceneViewCamera)
             {
                 m_FirstProcessInSceneView.Setup(m_ActiveCameraColorAttachment);
                 EnqueuePass(m_FirstProcessInSceneView);
