@@ -39,10 +39,15 @@ Unity リニア の色空間にある UI 画像の透明さをなおす為に作
  
   
 * 11 / 12 / 2021:  
-  Fixed the Color Depth resolution of 3D render.
+  Fixed the Color Depth resolution of 3D render.  
+  
+  
+* 11 / 19 / 2021:  
+  Fixed the the wrong effects of Reflection Probe in scene view.  
+  Fixed the the wrong effects of Transparent Objects in scene view.
 
 ### Plan:
-* To fix the wrong effects of Reflection Probe in scene view.
+* To Develop Camera Managing Script. 
 
 # Pipeline Flowchart
 ![UI_RenderPipeline](./Readme/UI_RenderPipeline.png)
