@@ -45,6 +45,9 @@ Unity リニア の色空間にある UI 画像の透明さをなおす為に作
 * 11 / 19 / 2021:  
   Fixed the the wrong effects of Reflection Probe in scene view.  
   Fixed the the wrong effects of Transparent Objects in scene view.
+  
+* 11 / 28 / 2021:  
+  Supported UI Render with Individual resolution.
 
 ### Plan:
 * To Develop Camera Managing Script. 
