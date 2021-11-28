@@ -513,7 +513,7 @@ namespace UnityEngine.Rendering.Universal
             // Purpose: First Process of Fix UI alpha gamma in case of Post-Processing Off.
             if (!anyPostProcessing && !isSceneViewCamera && camera.CompareTag("MainCamera"))
             {
-                m_FirstProcessWhenNoPost.Setup(m_ActiveCameraColorAttachment);
+                m_FirstProcessWhenNoPost.Setup(m_ActiveCameraColorAttachment,m_ActiveCameraDepthAttachment);
                 EnqueuePass(m_FirstProcessWhenNoPost);
             }
             // End Add

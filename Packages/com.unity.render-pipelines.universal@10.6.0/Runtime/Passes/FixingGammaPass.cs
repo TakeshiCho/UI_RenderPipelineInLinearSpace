@@ -13,12 +13,13 @@ namespace UnityEngine.Rendering.Universal.Internal
     public class FixingGammaPass : ScriptableRenderPass
     {
         RenderTargetHandle m_Source;
+        RenderTargetHandle m_Depth;
         Material m_BlitMaterial;
 
         RenderTargetHandle m_TempBlit;
         ProfilingSampler m_ProfilingSampler;
         string m_ShaderKeyword;
-        
+
         public FixingGammaPass(RenderPassEvent evt, Material blitMaterial, string profilerTag, string shaderKeyword)
         {
             //base.profilingSampler = new ProfilingSampler(nameof(FixingGammaPass));
@@ -45,8 +46,14 @@ namespace UnityEngine.Rendering.Universal.Internal
         public void Setup(in RenderTargetHandle colorHandle)
         {
             m_Source = colorHandle;
-            
         }
+
+        public void Setup(in RenderTargetHandle colorHandle, in RenderTargetHandle depth)
+        {
+            Setup(colorHandle);
+            m_Depth = depth;
+        }
+        
 
         /// <inheritdoc/>
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
@@ -87,8 +94,14 @@ namespace UnityEngine.Rendering.Universal.Internal
 
                     // Recreate Main Buffer
                     cmd.ReleaseTemporaryRT(m_Source.id);
-
+                    cmd.ReleaseTemporaryRT(m_Depth.id);
+                    desc.height = Screen.height;
+                    desc.width = Screen.width;
+                    
+                    cmd.GetTemporaryRT(m_Depth.id,desc);
+                    
                     desc.graphicsFormat = GraphicsFormat.R8G8B8A8_UNorm;
+                    
                     cmd.GetTemporaryRT(m_Source.id, desc);
                     cmd.SetGlobalTexture(ShaderPropertyId.sourceTex, m_TempBlit.Identifier());
 

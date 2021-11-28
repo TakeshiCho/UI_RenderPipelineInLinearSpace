@@ -502,6 +502,10 @@ namespace UnityEngine.Rendering.Universal.Internal
                     {
                         // Add by:Takeshi
                         cmd.ReleaseTemporaryRT(m_Source.id);
+                        cmd.ReleaseTemporaryRT(m_Depth.id);
+                        m_Descriptor.height = Screen.height;
+                        m_Descriptor.width = Screen.width;
+                        cmd.GetTemporaryRT(m_Depth.id,m_Descriptor);
                         m_Descriptor.graphicsFormat = GraphicsFormat.R8G8B8A8_UNorm;
                         cmd.GetTemporaryRT(m_Source.id,m_Descriptor);
                         // End Add
