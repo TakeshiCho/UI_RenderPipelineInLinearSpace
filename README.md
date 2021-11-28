@@ -27,6 +27,11 @@ Unity リニア の色空間にある UI 画像の透明さをなおす為に作
 
 ![Opacity_Comparison](./Readme/Opacity_Comparison.png)
 
+* UI Render with Individual resolution.
+
+![RenderScaleComparison](./Readme/RenderScaleComparison.png)  
+  
+
 ### Update:
 * 11 / 05 / 2021:  
   Supported correct UI alpha gamma in case of Post-Processing;  
