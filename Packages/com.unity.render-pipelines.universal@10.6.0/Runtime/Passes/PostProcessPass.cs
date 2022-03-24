@@ -22,6 +22,7 @@ namespace UnityEngine.Rendering.Universal.Internal
     {
         RenderTextureDescriptor m_Descriptor;
         RenderTargetHandle m_Source;
+        RenderTargetHandle m_UguiTarget;
         RenderTargetHandle m_Destination;
         RenderTargetHandle m_Depth;
         RenderTargetHandle m_InternalLut;
@@ -142,6 +143,21 @@ namespace UnityEngine.Rendering.Universal.Internal
             m_HasFinalPass = hasFinalPass;
             m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
         }
+        public void Setup(in RenderTextureDescriptor baseDescriptor, in RenderTargetHandle source, in RenderTargetHandle destination, in RenderTargetHandle depth, in RenderTargetHandle internalLut, in RenderTargetHandle uiTarget,bool hasFinalPass, bool enableSRGBConversion)
+        {
+            m_UguiTarget = uiTarget;
+            m_Descriptor = baseDescriptor;
+            //m_Descriptor.graphicsFormat = GraphicsFormat.R8G8B8A8_UNorm; //Add by:Takeshi
+            m_Descriptor.useMipMap = false;
+            m_Descriptor.autoGenerateMips = false;
+            m_Source = source;
+            m_Destination = destination;
+            m_Depth = depth;
+            m_InternalLut = internalLut;
+            m_IsFinalPass = false;
+            m_HasFinalPass = hasFinalPass;
+            m_EnableSRGBConversionIfNeeded = enableSRGBConversion;
+        }
 
         public void SetupFinalPass(in RenderTargetHandle source)
         {
@@ -150,6 +166,15 @@ namespace UnityEngine.Rendering.Universal.Internal
             m_IsFinalPass = true;
             m_HasFinalPass = false;
             m_EnableSRGBConversionIfNeeded = true;
+        }
+        public void SetupFinalPass(in RenderTargetHandle source,in RenderTargetHandle uguiTarget)
+        {
+            m_Source = source;
+            m_Destination = RenderTargetHandle.CameraTarget;
+            m_IsFinalPass = true;
+            m_HasFinalPass = false;
+            m_EnableSRGBConversionIfNeeded = true;
+            m_UguiTarget = uguiTarget;
         }
 
         /// <inheritdoc/>
@@ -500,21 +525,13 @@ namespace UnityEngine.Rendering.Universal.Internal
                     // in the pipeline to avoid this extra blit.
                     if (!finishPostProcessOnScreen)
                     {
-                        // Add by:Takeshi
-                        cmd.ReleaseTemporaryRT(m_Source.id);
-                        cmd.ReleaseTemporaryRT(m_Depth.id);
-                        m_Descriptor.height = Screen.height;
-                        m_Descriptor.width = Screen.width;
-                        cmd.GetTemporaryRT(m_Depth.id,m_Descriptor);
-                        m_Descriptor.graphicsFormat = GraphicsFormat.R8G8B8A8_UNorm;
-                        cmd.GetTemporaryRT(m_Source.id,m_Descriptor);
-                        // End Add
-                        
                         cmd.SetGlobalTexture(ShaderPropertyId.sourceTex, cameraTarget);
-                        cmd.SetRenderTarget(m_Source.id, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
+                        
+                        // Change by:Takeshi; Set UI target
+                        cmd.SetRenderTarget(m_UguiTarget.id, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
+                        
                         cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_BlitMaterial);
                     }
-
                     cmd.SetViewProjectionMatrices(cameraData.camera.worldToCameraMatrix, cameraData.camera.projectionMatrix);
                 }
 
@@ -1220,7 +1237,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             if (RequireSRGBConversionBlitToBackBuffer(cameraData))
                 material.EnableKeyword(ShaderKeywordStrings.LinearToSRGBConversion);
 
-            cmd.SetGlobalTexture(ShaderPropertyId.sourceTex, m_Source.Identifier());
+            cmd.SetGlobalTexture(ShaderPropertyId.sourceTex, m_UguiTarget.Identifier());
 
             var colorLoadAction = cameraData.isDefaultViewport ? RenderBufferLoadAction.DontCare : RenderBufferLoadAction.Load;
 

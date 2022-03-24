@@ -1,5 +1,6 @@
 using UnityEngine.Rendering.Universal.Internal;
 using System.Reflection;
+using UnityEngine.Experimental.Rendering;
 
 namespace UnityEngine.Rendering.Universal
 {
@@ -73,7 +74,7 @@ namespace UnityEngine.Rendering.Universal
 #if UNITY_EDITOR
         SceneViewDepthCopyPass m_SceneViewDepthCopyPass;
 #endif
-
+        RenderTargetHandle m_UguiTaget;
         RenderTargetHandle m_ActiveCameraColorAttachment;
         RenderTargetHandle m_ActiveCameraDepthAttachment;
         RenderTargetHandle m_CameraColorAttachment;
@@ -210,6 +211,7 @@ namespace UnityEngine.Rendering.Universal
 
             // RenderTexture format depends on camera and pipeline (HDR, non HDR, etc)
             // Samples (MSAA) depend on camera and pipeline
+            m_UguiTaget.Init("_UIColorTexture");
             m_CameraColorAttachment.Init("_CameraColorTexture");
             m_CameraDepthAttachment.Init("_CameraDepthAttachment");
             m_DepthTexture.Init("_CameraDepthTexture");
@@ -297,6 +299,7 @@ namespace UnityEngine.Rendering.Universal
             // Assign the camera color target early in case it is needed during AddRenderPasses.
             bool isPreviewCamera = cameraData.isPreviewCamera;
             bool isRunningHololens = false;
+            bool isUICamera = camera.CompareTag("UICamera");
 #if ENABLE_VR && ENABLE_VR_MODULE
             isRunningHololens = UniversalRenderPipeline.IsRunningHololens(cameraData);
 #endif
@@ -496,7 +499,6 @@ namespace UnityEngine.Rendering.Universal
                 }
 
                 EnqueuePass(m_RenderTransparentForwardPass);
-                EnqueuePass(m_UguiPass); // Add By: Takeshi
             }
             EnqueuePass(m_OnRenderObjectCallbackPass);
 
@@ -513,16 +515,26 @@ namespace UnityEngine.Rendering.Universal
             // Purpose: First Process of Fix UI alpha gamma in case of Post-Processing Off.
             if (!anyPostProcessing && !isSceneViewCamera && camera.CompareTag("MainCamera"))
             {
-                m_FirstProcessWhenNoPost.Setup(m_ActiveCameraColorAttachment,m_ActiveCameraDepthAttachment);
+                m_FirstProcessWhenNoPost.Setup(m_UguiTaget,m_ActiveCameraColorAttachment,m_ActiveCameraDepthAttachment);
                 EnqueuePass(m_FirstProcessWhenNoPost);
+            }
+            
+            if (isUICamera)
+            {
+                m_UguiPass.Setup(m_UguiTaget,true);
+                EnqueuePass(m_UguiPass); // Add By: Takeshi
+                    
             }
             // End Add
             
             // Add by:  Takeshi
             // Purpose: Fix Scene View UI opacity
             #if UNITY_EDITOR
-            if (cameraData.isSceneViewCamera)
+            if (isSceneViewCamera)
             {
+                m_UguiPass.Setup(false);
+                EnqueuePass(m_UguiPass); // Add By: Takeshi
+                
                 m_FirstProcessInSceneView.Setup(m_ActiveCameraColorAttachment);
                 EnqueuePass(m_FirstProcessInSceneView);
             
@@ -545,7 +557,7 @@ namespace UnityEngine.Rendering.Universal
 
                     // if resolving to screen we need to be able to perform sRGBConvertion in post-processing if necessary
                     bool doSRGBConvertion = resolvePostProcessingToCameraTarget;
-                    m_PostProcessPass.Setup(cameraTargetDescriptor, m_ActiveCameraColorAttachment, destination, m_ActiveCameraDepthAttachment, m_ColorGradingLut, applyFinalPostProcessing, doSRGBConvertion);
+                    m_PostProcessPass.Setup(cameraTargetDescriptor, m_ActiveCameraColorAttachment, destination, m_ActiveCameraDepthAttachment, m_ColorGradingLut, m_UguiTaget,applyFinalPostProcessing, doSRGBConvertion);
                     EnqueuePass(m_PostProcessPass);
                 }
 
@@ -556,7 +568,7 @@ namespace UnityEngine.Rendering.Universal
                 // Do FXAA or any other final post-processing effect that might need to run after AA.
                 if (applyFinalPostProcessing)
                 {
-                    m_FinalPostProcessPass.SetupFinalPass(sourceForFinalPass);
+                    m_FinalPostProcessPass.SetupFinalPass(sourceForFinalPass,m_UguiTaget);
                     EnqueuePass(m_FinalPostProcessPass);
                 }
 
@@ -579,7 +591,8 @@ namespace UnityEngine.Rendering.Universal
                 // We need final blit to resolve to screen
                 if (!cameraTargetResolved)
                 {
-                    m_FinalBlitPass.Setup(cameraTargetDescriptor, sourceForFinalPass);
+                    RenderTargetHandle finalTarget = isUICamera ? m_UguiTaget : m_ActiveCameraColorAttachment;
+                    m_FinalBlitPass.Setup(cameraTargetDescriptor, finalTarget);
                     EnqueuePass(m_FinalBlitPass);
                 }
 
@@ -599,7 +612,7 @@ namespace UnityEngine.Rendering.Universal
             // stay in RT so we resume rendering on stack after post-processing
             else if (applyPostProcessing)
             {
-                m_PostProcessPass.Setup(cameraTargetDescriptor, m_ActiveCameraColorAttachment, m_AfterPostProcessColor, m_ActiveCameraDepthAttachment, m_ColorGradingLut, false, false);
+                m_PostProcessPass.Setup(cameraTargetDescriptor, m_ActiveCameraColorAttachment, m_AfterPostProcessColor, m_ActiveCameraDepthAttachment, m_ColorGradingLut, m_UguiTaget,false, false);
                 EnqueuePass(m_PostProcessPass);
             }
 
@@ -668,6 +681,7 @@ namespace UnityEngine.Rendering.Universal
                 cmd.ReleaseTemporaryRT(m_ActiveCameraDepthAttachment.id);
                 m_ActiveCameraDepthAttachment = RenderTargetHandle.CameraTarget;
             }
+            cmd.ReleaseTemporaryRT(m_UguiTaget.id);
         }
 
         void EnqueueDeferred(ref RenderingData renderingData, bool hasDepthPrepass, bool applyMainShadow, bool applyAdditionalShadow)
@@ -773,6 +787,17 @@ namespace UnityEngine.Rendering.Universal
                     depthDescriptor.colorFormat = RenderTextureFormat.Depth;
                     depthDescriptor.depthBufferBits = k_DepthStencilBufferBits;
                     cmd.GetTemporaryRT(m_ActiveCameraDepthAttachment.id, depthDescriptor, FilterMode.Point);
+                }
+
+                {
+                    var uiDescriptor = descriptor;
+                    uiDescriptor.useMipMap = false;
+                    uiDescriptor.autoGenerateMips = false;
+                    uiDescriptor.depthBufferBits =  0;
+                    uiDescriptor.height = Screen.height;
+                    uiDescriptor.width = Screen.width;
+                    uiDescriptor.graphicsFormat = GraphicsFormat.R8G8B8A8_UNorm;
+                    cmd.GetTemporaryRT(m_UguiTaget.id, uiDescriptor, FilterMode.Bilinear);
                 }
             }
 

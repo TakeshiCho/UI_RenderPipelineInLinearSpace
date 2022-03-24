@@ -14,10 +14,12 @@ namespace UnityEngine.Rendering.Universal.Internal
     {
         FilteringSettings m_FilteringSettings;
         RenderStateBlock m_RenderStateBlock;
+        RenderTargetHandle m_UguiTarget;
         List<ShaderTagId> m_ShaderTagIdList = new List<ShaderTagId>();
         string m_ProfilerTag;
         ProfilingSampler m_ProfilingSampler;
         bool m_IsOpaque;
+        bool m_IsGameViewUI;
         LayerMask m_LayerMask;
 
         static readonly int s_DrawObjectPassDataPropID = Shader.PropertyToID("_DrawObjectPassData");
@@ -57,6 +59,15 @@ namespace UnityEngine.Rendering.Universal.Internal
             m_ProfilingSampler = ProfilingSampler.Get(profileId);
         }
 
+        public void Setup(bool isGameViewUI)
+        {
+            m_IsGameViewUI = isGameViewUI;
+        }
+        public void Setup(RenderTargetHandle uiTargetHandle,bool isGameViewUI)
+        {
+            m_UguiTarget = uiTargetHandle;
+            m_IsGameViewUI = isGameViewUI;
+        }
         /// <inheritdoc/>
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
@@ -66,7 +77,8 @@ namespace UnityEngine.Rendering.Universal.Internal
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
                 Camera camera = renderingData.cameraData.camera;
-                if (camera.CompareTag("UICamera"))
+                bool isUICamera = camera.CompareTag("UICamera");
+                if (isUICamera)
                     cmd.SetGlobalFloat(ShaderPropertyId.isInUICamera,1);
 #if UNITY_EDITOR
                 else if(m_FilteringSettings.layerMask == LayerMask.GetMask("UI") && renderingData.cameraData.isSceneViewCamera)
@@ -104,7 +116,12 @@ namespace UnityEngine.Rendering.Universal.Internal
                     filterSettings.layerMask = -1;
                 }
                 #endif
-
+                if (m_IsGameViewUI && m_UguiTarget != default)
+                {
+                    cmd.SetRenderTarget(m_UguiTarget.Identifier());
+                    context.ExecuteCommandBuffer(cmd);
+                    cmd.Clear();
+                }
                 context.DrawRenderers(renderingData.cullResults, ref drawSettings, ref filterSettings, ref m_RenderStateBlock);
 
                 // Render objects that did not match any shader pass with error shader
