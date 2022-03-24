@@ -77,6 +77,8 @@ namespace UnityEngine.Rendering.Universal.Internal
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
                 Camera camera = renderingData.cameraData.camera;
+                
+                /* Add by: Takeshi, Set UI image shder properties */
                 if (m_IsGameViewUI)
                     cmd.SetGlobalFloat(ShaderPropertyId.isInUICamera,1);
 #if UNITY_EDITOR
@@ -84,6 +86,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                     cmd.SetGlobalFloat(ShaderPropertyId.isInUICamera,1);
 #endif
                 else cmd.SetGlobalFloat(ShaderPropertyId.isInUICamera,0);
+                /* End Add */
                 
                 // Global render pass data containing various settings.
                 // x,y,z are currently unused
@@ -115,12 +118,16 @@ namespace UnityEngine.Rendering.Universal.Internal
                     filterSettings.layerMask = -1;
                 }
                 #endif
+                
+                /* Add by: Takeshi, Set UI Render target */
                 if (m_IsGameViewUI && m_UguiTarget != default)
                 {
                     cmd.SetRenderTarget(m_UguiTarget.Identifier());
                     context.ExecuteCommandBuffer(cmd);
                     cmd.Clear();
                 }
+                /* End Add */
+                
                 context.DrawRenderers(renderingData.cullResults, ref drawSettings, ref filterSettings, ref m_RenderStateBlock);
 
                 // Render objects that did not match any shader pass with error shader
