@@ -77,8 +77,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             using (new ProfilingScope(cmd, m_ProfilingSampler))
             {
                 Camera camera = renderingData.cameraData.camera;
-                bool isUICamera = camera.CompareTag("UICamera");
-                if (isUICamera)
+                if (m_IsGameViewUI)
                     cmd.SetGlobalFloat(ShaderPropertyId.isInUICamera,1);
 #if UNITY_EDITOR
                 else if(m_FilteringSettings.layerMask == LayerMask.GetMask("UI") && renderingData.cameraData.isSceneViewCamera)
