@@ -54,6 +54,9 @@ Unity リニア の色空間にある UI 画像の透明さをなおす為に作
 * 11 / 28 / 2021:  
   Supported UI Render with Individual resolution.
 
+* 03 / 24 / 2022:  
+  Changed the UI Render Target.
+
 ### Plan:
 * To Develop Camera Managing Script. 
 
