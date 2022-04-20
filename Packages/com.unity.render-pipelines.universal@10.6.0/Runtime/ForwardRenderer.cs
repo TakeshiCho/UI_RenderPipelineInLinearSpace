@@ -793,7 +793,7 @@ namespace UnityEngine.Rendering.Universal
                     var uiDescriptor = descriptor;
                     uiDescriptor.useMipMap = false;
                     uiDescriptor.autoGenerateMips = false;
-                    uiDescriptor.depthBufferBits =  0;
+                    uiDescriptor.depthBufferBits = 24;
                     uiDescriptor.height = Screen.height;
                     uiDescriptor.width = Screen.width;
                     uiDescriptor.graphicsFormat = GraphicsFormat.R8G8B8A8_UNorm;
